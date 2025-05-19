@@ -102,6 +102,11 @@ fn show_help() !void {
         \\
     , .{});
 }
+// ANSI escape codes for red, green, reset
+const red = "\x1b[31m";
+const green = "\x1b[32m";
+const cyan = "\x1b[36m";
+const reset = "\x1b[0m";
 
 fn hex_dump(writer: anytype, data: []const u8) !void {
     var offset: usize = 0;
@@ -115,11 +120,11 @@ fn hex_dump(writer: anytype, data: []const u8) !void {
 
         std.mem.copyForwards(u8, buffer[0..chunk_len], slice);
 
-        try writer.print("{x:0>8}: ", .{offset});
+        try writer.print("{s}{x:0>8}: {s}", .{ cyan, offset, reset });
 
         // Print hex bytes
         for (buffer[0..chunk_len], 0..) |byte, i| {
-            try writer.print("{x:0>2} ", .{byte});
+            try writer.print("{s}{x:0>2} {s}", .{ green, byte, reset });
             if (i == 7) try writer.print(" ", .{}); // extra space after 8 bytes
         }
 
