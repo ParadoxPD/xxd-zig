@@ -18,24 +18,40 @@ pub fn main() !void {
 
     var list = std.ArrayList(u8).init(allocator);
     defer list.deinit();
-    const writer = list.writer();
+    const listwriter = list.writer();
 
     if (parsed_args.get("-t")) |value| {
         //try stdout.print("Value : {s}\n", .{value});
-        try hex_dump(writer, value);
-
+        try hex_dump(listwriter, value);
         const hex_str = try list.toOwnedSlice();
         defer allocator.free(hex_str);
         try stdout.print("{s}\n", .{hex_str});
+        if (parsed_args.get("-o")) |out_file_path| {
+            try write_to_file(out_file_path, hex_str);
+        }
     }
+
     if (parsed_args.get("-i")) |value| {
         //try stdout.print("Value : {s}\n", .{value});
-        try hex_dump_file(writer, value);
-
+        try hex_dump_file(listwriter, value);
         const hex_str = try list.toOwnedSlice();
         defer allocator.free(hex_str);
         try stdout.print("{s}\n", .{hex_str});
+        if (parsed_args.get("-o")) |out_file_path| {
+            try write_to_file(out_file_path, hex_str);
+        }
     }
+}
+
+fn write_to_file(out_file_path: []const u8, data: []u8) !void {
+    //try stdout.print("Value : {s}\n", .{value});
+    const out_file = try std.fs.cwd().createFile(
+        out_file_path,
+        .{ .read = false, .truncate = true }, // overwrite if it exists
+    );
+    defer out_file.close();
+    const filewriter = out_file.writer();
+    try filewriter.print("{s}", .{data});
 }
 
 fn parse_commandline(args: [][]const u8) !std.StringHashMap([]const u8) {
