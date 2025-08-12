@@ -83,7 +83,13 @@ fn parse_commandline(args: [][]const u8) !std.StringHashMap([]const u8) {
             if (i < args.len) {
                 try parsed_args.put("-t", args[i]);
             } else {
-                return error.MissingInputText;
+                // Read from stdin
+                var stdin = std.io.getStdIn().reader();
+                var buffer: [1024]u8 = undefined;
+                const n = try stdin.read(&buffer);
+                if (n == 0) return error.MissingInputText;
+                const text = try alloc.dupe(u8, buffer[0..n]);
+                try parsed_args.put("-t", text);
             }
         } else if (std.mem.eql(u8, arg, "-h")) {
             help_flag = true;
