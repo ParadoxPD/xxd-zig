@@ -122,6 +122,7 @@ fn show_help() !void {
 const red = "\x1b[31m";
 const green = "\x1b[32m";
 const cyan = "\x1b[36m";
+const yellow = "\x1b[33m";
 const reset = "\x1b[0m";
 
 fn hex_dump(writer: anytype, data: []const u8) !void {
@@ -156,7 +157,7 @@ fn hex_dump(writer: anytype, data: []const u8) !void {
         try writer.print(" |", .{});
         for (buffer[0..chunk_len]) |byte| {
             const c = if (std.ascii.isPrint(byte)) byte else '.';
-            try writer.print("{c}", .{c});
+            try writer.print("{s}{c}{s}", .{ yellow, c, reset });
         }
 
         try writer.print("\n", .{});
